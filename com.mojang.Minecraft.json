@@ -1,12 +1,10 @@
 {
   "app-id": "com.mojang.Minecraft",
-  "runtime": "org.freedesktop.Platform",
-  "runtime-version": "1.6",
-  "sdk": "org.freedesktop.Sdk",
+  "runtime": "org.gnome.Platform",
+  "runtime-version": "3.28",
+  "sdk": "org.gnome.Sdk",
   "command": "minecraft",
-  "sdk-extensions": [
-    "org.freedesktop.Sdk.Extension.openjdk10"
-  ],
+  "sdk-extensions": [],
   "finish-args": [
     "--persist=.minecraft",
     /* X11 access */
@@ -19,9 +17,7 @@
     /* Network access */
     "--share=network"
   ],
-  "build-options" : {
-      "append-path": "/usr/lib/sdk/openjdk10/bin"
-  },
+  "build-options" : {},
   "modules": [
     {
       /* Needed by Minecraft 1.8.2 and up. */
@@ -35,17 +31,11 @@
       ]
     },
     {
-      "name": "openjdk",
-      "buildsystem": "simple",
-      "build-commands": [
-        "/usr/lib/sdk/openjdk10/install.sh"
-      ]
-    },
-    {
       "name": "minecraft",
       "buildsystem": "simple",
       "build-commands": [
         "mkdir -p /app/extra",
+        "install -Dp -m 755 apply_extra /app/bin/apply_extra",
         "install -Dp -m 755 minecraft /app/bin/minecraft",
         "install -Dp -m 644 com.mojang.Minecraft.desktop /app/share/applications/com.mojang.Minecraft.desktop",
         "install -Dp -m 644 com.mojang.Minecraft-64.png /app/share/icons/hicolor/64x64/apps/com.mojang.Minecraft.png",
@@ -55,6 +45,15 @@
       ],
       "sources" : [
         {
+          "type": "script",
+          "dest-filename": "apply_extra",
+          "commands": [
+              "tar -zxf /app/extra/jre-8u171-linux-x64.tar.gz -C /app/extra/",
+              "mv /app/extra/jre1.8.0_171 /app/extra/jre8",
+              "rm /app/extra/jre-8u171-linux-x64.tar.gz"
+          ]
+        },
+        {
           "type": "extra-data",
           "filename": "Minecraft.jar",
           "url": "http://s3.amazonaws.com/Minecraft.Download/launcher/Minecraft.jar",
@@ -62,9 +61,16 @@
           "size": 280212
         },
         {
+          "type": "extra-data",
+          "filename": "jre-8u171-linux-x64.tar.gz",
+          "url": "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=233162_512cd62ec5174c3487ac17c61aaa89e8",
+          "sha256": "d489c36c2b1c056f399fcd3893ee5d80da873ab7d5c73980a7b6cd8b87a6f6ba",
+          "size": 81166060
+        },
+        {
           "type": "script",
           "commands": [
-            "/app/jre/bin/java -jar /app/extra/Minecraft.jar /app/jre/bin/java"
+            "/app/extra/jre8/bin/java -jar /app/extra/Minecraft.jar /app/extra/jre8/bin/java"
           ],
           "dest-filename": "minecraft"
         },

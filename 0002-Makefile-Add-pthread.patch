@@ -1,0 +1,25 @@
+From dd0b5b7d7cdb7d3f06cb2054d2867a46c5f327c7 Mon Sep 17 00:00:00 2001
+From: Adrien Plazas <kekun.plazas@laposte.net>
+Date: Sun, 10 Jan 2021 15:08:36 +0100
+Subject: [PATCH 2/4] Makefile: Add -pthread
+
+This was necessary for it to build for me.
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index aa6ed74..964356f 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,6 +1,6 @@
+ CXXFLAGS_ALL = $(shell pkg-config --cflags sdl2 vorbisfile vorbis theoradec) -Idependencies/all/theoraplay $(CXXFLAGS)
+ LDFLAGS_ALL = $(LDFLAGS)
+-LIBS_ALL = $(shell pkg-config --libs sdl2 vorbisfile vorbis theoradec) $(LIBS)
++LIBS_ALL = $(shell pkg-config --libs sdl2 vorbisfile vorbis theoradec) -pthread $(LIBS)
+ 
+ SOURCES = dependencies/all/theoraplay/theoraplay.c \
+           SonicCDDecomp/Animation.cpp \
+-- 
+2.29.2
+

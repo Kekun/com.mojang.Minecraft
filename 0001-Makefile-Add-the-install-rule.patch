@@ -1,0 +1,24 @@
+From b9923814c64a348249c4a78cb21df903d6ebdf71 Mon Sep 17 00:00:00 2001
+From: Adrien Plazas <kekun.plazas@laposte.net>
+Date: Sun, 10 Jan 2021 15:15:13 +0100
+Subject: [PATCH 1/4] Makefile: Add the install rule
+
+That will help flatpaking the game.
+---
+ Makefile | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/Makefile b/Makefile
+index a93b74e..aa6ed74 100644
+--- a/Makefile
++++ b/Makefile
+@@ -32,3 +32,6 @@ objects/%.o: %
+ 
+ soniccd: $(SOURCES:%=objects/%.o)
+ 	$(CXX) $(CXXFLAGS_ALL) $(LDFLAGS_ALL) $^ -o $@ $(LIBS_ALL)
++
++install: soniccd
++	install -Dp -m755 soniccd $(prefix)/bin/soniccd
+-- 
+2.29.2
+

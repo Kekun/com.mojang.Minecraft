@@ -1,0 +1,111 @@
+From 0366fe1e19f0c574365a0dd051bb9e8b82fd71c3 Mon Sep 17 00:00:00 2001
+From: Adrien Plazas <kekun.plazas@laposte.net>
+Date: Sun, 10 Jan 2021 15:23:34 +0100
+Subject: [PATCH 3/4] Look for data files in the Steam install
+
+This will help distributing the engine without having to distribute the
+game's data.
+---
+ Makefile                      |  1 +
+ SonicCDDecomp/Path.cpp        | 21 +++++++++++++++++++++
+ SonicCDDecomp/Path.hpp        |  8 ++++++++
+ SonicCDDecomp/RetroEngine.cpp |  3 ++-
+ SonicCDDecomp/Video.cpp       |  3 ++-
+ 5 files changed, 34 insertions(+), 2 deletions(-)
+ create mode 100644 SonicCDDecomp/Path.cpp
+ create mode 100644 SonicCDDecomp/Path.hpp
+
+diff --git a/Makefile b/Makefile
+index 964356f..c390dd0 100644
+--- a/Makefile
++++ b/Makefile
+@@ -14,6 +14,7 @@ SOURCES = dependencies/all/theoraplay/theoraplay.c \
+           SonicCDDecomp/Math.cpp \
+           SonicCDDecomp/Object.cpp \
+           SonicCDDecomp/Palette.cpp \
++          SonicCDDecomp/Path.cpp \
+           SonicCDDecomp/Player.cpp \
+           SonicCDDecomp/Reader.cpp \
+           SonicCDDecomp/RetroEngine.cpp \
+diff --git a/SonicCDDecomp/Path.cpp b/SonicCDDecomp/Path.cpp
+new file mode 100644
+index 0000000..86802b6
+--- /dev/null
++++ b/SonicCDDecomp/Path.cpp
+@@ -0,0 +1,21 @@
++#include "Path.hpp"
++#include <sys/types.h>
++#include <unistd.h>
++#include <pwd.h>
++
++static const std::string GetHomeDirectory()
++{
++    struct passwd *pw = getpwuid(getuid());
++
++    return std::string(pw->pw_dir);
++}
++
++static const std::string GetSteamDataDirectory()
++{
++    return GetHomeDirectory() + "/.var/app/com.valvesoftware.Steam/.local/share/Steam/steamapps/common/Sonic CD/";
++}
++
++const std::string DataDirectory(const char *path)
++{
++    return GetSteamDataDirectory() + path;
++}
+diff --git a/SonicCDDecomp/Path.hpp b/SonicCDDecomp/Path.hpp
+new file mode 100644
+index 0000000..faae5fb
+--- /dev/null
++++ b/SonicCDDecomp/Path.hpp
+@@ -0,0 +1,8 @@
++#ifndef PATH_H
++#define PATH_H
++
++#include <string>
++
++const std::string DataDirectory(const char *path);
++
++#endif // !PATH_H
+diff --git a/SonicCDDecomp/RetroEngine.cpp b/SonicCDDecomp/RetroEngine.cpp
+index d9e2744..0f779a0 100644
+--- a/SonicCDDecomp/RetroEngine.cpp
++++ b/SonicCDDecomp/RetroEngine.cpp
+@@ -1,4 +1,5 @@
+ #include "RetroEngine.hpp"
++#include "Path.hpp"
+ 
+ bool usingCWD = false;
+ bool engineDebugMode = false;
+@@ -211,7 +212,7 @@ void RetroEngine::Init()
+     CalculateTrigAngles();
+     GenerateBlendLookupTable();
+ 
+-    CheckRSDKFile(BASE_PATH "Data.rsdk");
++    CheckRSDKFile(DataDirectory("Data.rsdk").c_str());
+     InitUserdata();
+ 
+     gameMode = ENGINE_EXITGAME;
+diff --git a/SonicCDDecomp/Video.cpp b/SonicCDDecomp/Video.cpp
+index 2403ed3..7895d0e 100644
+--- a/SonicCDDecomp/Video.cpp
++++ b/SonicCDDecomp/Video.cpp
+@@ -1,4 +1,5 @@
+ ﻿#include "RetroEngine.hpp"
++#include "Path.hpp"
+ 
+ int currentVideoFrame = 0;
+ int videoFrameCount = 0;
+@@ -35,7 +36,7 @@ static void videoClose(THEORAPLAY_Io *io)
+ 
+ void PlayVideoFile(char *filePath) { 
+     char filepath[0x100];
+-    StrCopy(filepath, BASE_PATH"videos/");
++    StrCopy(filepath, DataDirectory("videos/").c_str());
+     StrAdd(filepath, filePath);
+     StrAdd(filepath, ".ogv");
+ 
+-- 
+2.29.2
+
